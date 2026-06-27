@@ -13,7 +13,7 @@ PASSWORD = "Msfvenom123"
 NOTEBOOK_URL = "https://www.kaggle.com/code/dcfsvfdvbgb/updated-telebot-wan-vid/edit"
 
 def run_kaggle():
-    print("🚀 Starting Kaggle Runner...")
+    print("🚀 Starting Kaggle Runner (Debug Mode)...")
     driver = None
     try:
         chrome_options = Options()
@@ -22,69 +22,86 @@ def run_kaggle():
         chrome_options.add_argument("--disable-dev-shm-usage")
         chrome_options.add_argument("--disable-gpu")
         chrome_options.add_argument("--window-size=1920,1080")
-
-        driver = webdriver.Chrome(service=Service(), options=chrome_options)
-        wait = WebDriverWait(driver, 30)
+        chrome_options.add_argument("--disable-blink-features=AutomationControlled")
         
-        print("1. Opening Kaggle Login Page...")
+        driver = webdriver.Chrome(service=Service(), options=chrome_options)
+        wait = WebDriverWait(driver, 40)  # Increased timeout
+        
+        print("1. Opening Kaggle Login...")
         driver.get("https://www.kaggle.com/account/login?phase=emailSignIn&returnUrl=%2F")
-        time.sleep(8)
-
-        print("2. Entering Email...")
-        email_field = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "input[type='email']")))
+        time.sleep(10)   # Extra wait for full load
+        
+        print("2. Looking for Email Field...")
+        email_selectors = [
+            (By.CSS_SELECTOR, "input[type='email']"),
+            (By.NAME, "email"),
+            (By.XPATH, "//input[contains(@placeholder, 'email')]")
+        ]
+        
+        email_field = None
+        for by, sel in email_selectors:
+            try:
+                email_field = wait.until(EC.presence_of_element_located((by, sel)))
+                print(f"✅ Found email field with: {sel}")
+                break
+            except:
+                continue
+        
+        if not email_field:
+            print("❌ Could not find email field. Current page title:", driver.title)
+            print("Page source snippet:", driver.page_source[:500])
+            return "Failed to find login form"
+        
+        email_field.clear()
         email_field.send_keys(EMAIL)
-        time.sleep(2)
+        time.sleep(3)
 
         print("3. Entering Password...")
         password_field = driver.find_element(By.CSS_SELECTOR, "input[type='password']")
         password_field.send_keys(PASSWORD)
-        time.sleep(2)
+        time.sleep(3)
 
         print("4. Clicking Sign In...")
         signin_btn = driver.find_element(By.XPATH, "//button[contains(., 'Sign in') or @type='submit']")
         signin_btn.click()
-        time.sleep(12)
+        time.sleep(15)
 
         print("5. Opening Notebook...")
         driver.get(NOTEBOOK_URL)
-        time.sleep(10)
+        time.sleep(12)
 
-        print("6. Looking for 'Run All' button...")
-        found = False
-        selectors = [
-            "//button[contains(text(), 'Run All')]",
-            "//button[contains(text(), 'Run all')]",
-            "//*[contains(text(), 'Run All')]/ancestor::button"
+        print("6. Clicking Run All...")
+        run_selectors = [
+            (By.XPATH, "//button[contains(text(), 'Run All')]"),
+            (By.XPATH, "//button[contains(text(), 'Run all')]"),
         ]
         
-        for sel in selectors:
+        clicked = False
+        for by, sel in run_selectors:
             try:
-                btn = wait.until(EC.element_to_be_clickable((By.XPATH, sel)))
-                print(f"Found button with selector: {sel}")
+                btn = wait.until(EC.element_to_be_clickable((by, sel)))
                 driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", btn)
                 time.sleep(2)
                 btn.click()
-                print("✅ SUCCESS: Run All button clicked!")
-                found = True
+                print("✅ SUCCESS: Run All clicked!")
+                clicked = True
                 break
-            except Exception as e:
-                print(f"Selector failed: {sel} | Error: {e}")
+            except:
                 continue
         
-        if not found:
-            print("❌ Could not find Run All button.")
-            print("Current page title:", driver.title)
-            
-        return "Kaggle Run Triggered Successfully!"
+        if not clicked:
+            print("❌ Run All button not found.")
+        
+        return "Kaggle Notebook Triggered!"
         
     except Exception as e:
-        error_msg = f"Error: {str(e)}\n{traceback.format_exc()}"
-        print(error_msg)
-        return error_msg
+        error = f"Error: {str(e)}\n{traceback.format_exc()}"
+        print(error)
+        return error
     finally:
         if driver:
             driver.quit()
 
 if __name__ == "__main__":
     result = run_kaggle()
-    print("Final Result:", result)
+    print("FINAL RESULT:", result)

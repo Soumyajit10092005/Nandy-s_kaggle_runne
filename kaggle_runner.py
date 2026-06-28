@@ -9,7 +9,7 @@ def trigger_kaggle():
         
         print("Pushing new version...")
         
-        # Correct way
+        # Correct call
         result = api.kernels_push("dcfsvfdvbgb/updated-telebot-wan-vid")
         
         print("✅ Kaggle Notebook triggered successfully!")

@@ -7,9 +7,12 @@ def trigger_kaggle():
         api = KaggleApi()
         api.authenticate()
         
-        print("Pushing new version...")
+        print("Sending request to run the notebook...")
         
-        # Correct call
+        # This is the correct way to run an existing notebook
+        api.kernels_pull("dcfsvfdvbgb/updated-telebot-wan-vid", path=".", force=True)
+        
+        # Push a new version to trigger execution
         result = api.kernels_push("dcfsvfdvbgb/updated-telebot-wan-vid")
         
         print("✅ Kaggle Notebook triggered successfully!")

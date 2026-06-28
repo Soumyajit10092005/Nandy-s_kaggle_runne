@@ -2,8 +2,7 @@
 import os
 from kaggle.api.kaggle_api_extended import KaggleApi
 import time
-
-
+# this is nprw
 def trigger_kaggle():
     print("🚀 Triggering Kaggle Notebook via API...")
     try:

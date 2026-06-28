@@ -9,8 +9,11 @@ def trigger_kaggle():
         
         print("Pushing new version to start the notebook...")
         
-        # Simple and compatible way
-        result = api.kernels_push("dcfsvfdvbgb/updated-telebot-wan-vid")
+        # Pass the path to the LOCAL folder containing kernel-metadata.json
+        # Use "." if the metadata file is in the exact same directory as this script
+        local_folder_path = "./my_kaggle_notebook" 
+        
+        result = api.kernels_push(local_folder_path)
         
         print("✅ Kaggle Notebook triggered successfully!")
         return "✅ Success! Notebook is running on Kaggle."

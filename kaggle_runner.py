@@ -1,47 +1,35 @@
-from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.chrome.options import Options
-from webdriver_manager.chrome import ChromeDriverManager
-import time
-import traceback
+# kaggle_runner.py
 import os
+from kaggle.api.kaggle_api_extended import KaggleApi
+import time
 
-EMAIL = "Nandy-0050@proton.me"
-PASSWORD = "Msfvenom123"
-NOTEBOOK_URL = "https://www.kaggle.com/code/dcfsvfdvbgb/updated-telebot-wan-vid/edit"
 
-def run_kaggle():
-    print("🚀 Starting Kaggle Runner...")
-    driver = None
+def trigger_kaggle():
+    print("🚀 Triggering Kaggle Notebook via API...")
     try:
-        chrome_options = Options()
-        chrome_options.add_argument("--headless=new")
-        chrome_options.add_argument("--no-sandbox")
-        chrome_options.add_argument("--disable-dev-shm-usage")
-        chrome_options.add_argument("--disable-gpu")
-        chrome_options.add_argument("--window-size=1920,1080")
-
-        # Auto install driver
-        service = Service(ChromeDriverManager().install())
-        driver = webdriver.Chrome(service=service, options=chrome_options)
+        api = KaggleApi()
+        api.authenticate()
         
-        print("✅ Browser started")
-        driver.get(NOTEBOOK_URL)
-        time.sleep(12)
-
-        print("Clicking Run All...")
-        btn = driver.find_element("xpath", "//button[contains(text(), 'Run All')]")
-        btn.click()
-        print("✅ Run All clicked!")
-        return "Success"
+        # Your notebook details
+        owner_slug = "dcfsvfdvbgb"
+        kernel_slug = "updated-telebot-wan-vid"
+        
+        print(f"Pushing version to {owner_slug}/{kernel_slug}...")
+        
+        result = api.kernels_push(
+            kernel_slug=kernel_slug,
+            new_title="Auto Triggered - Telebot Wan Vid",
+            version_type="save_version",
+            is_private=False
+        )
+        
+        print("✅ Kaggle Notebook started successfully!")
+        return "Kaggle Notebook Triggered via API!"
         
     except Exception as e:
-        print(traceback.format_exc())
+        print("Error:", e)
         return f"Failed: {str(e)}"
-    finally:
-        if driver:
-            driver.quit()
 
 if __name__ == "__main__":
-    result = run_kaggle()
-    print("FINAL:", result)
+    result = trigger_kaggle()
+    print("FINAL RESULT:", result)
